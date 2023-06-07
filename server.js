@@ -1,21 +1,17 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const bodyParser = require("body-parser");
 const { Client } = require("pg");
 
-// Параметри з'єднання з базою даних PostgreSQL
 const client = new Client({
   user: "postgres",
   host: "localhost",
-  database: "Hero", // Змініть назву бази даних на відповідну
-  password: "6006059a", // Змініть пароль на відповідний
+  database: "Hero",
+  password: "6006059a",
   port: 5432,
 });
 
-// Middleware для розпарсування JSON даних
-app.use(bodyParser.json());
-
-// Підключення до бази даних
 client
   .connect()
   .then(() => {
@@ -25,9 +21,12 @@ client
     console.error("Error connecting to database", error);
   });
 
-// Маршрут для отримання списку супергероїв
+app.use(bodyParser.json());
+app.use(express.static("public"));
+app.use(cors());
+
 app.get("/heroes", (req, res) => {
-  const query = "SELECT * FROM heroes"; // Змініть назву таблиці на відповідну
+  const query = "SELECT * FROM heroes";
   client
     .query(query)
     .then((results) => {
@@ -41,11 +40,10 @@ app.get("/heroes", (req, res) => {
     });
 });
 
-// Маршрут для додавання нового супергероя
 app.post("/heroes/add", (req, res) => {
   const { nickname, name, description, superpowers, phrase } = req.body;
   const query =
-    "INSERT INTO heroes (nickname, name, description, superpowers, phrase) VALUES ($1, $2, $3, $4, $5) RETURNING *"; // Змініть назву таблиці на відповідну
+    "INSERT INTO heroes (nickname, name, description, superpowers, phrase) VALUES ($1, $2, $3, $4, $5) RETURNING *";
   const values = [nickname, name, description, superpowers, phrase];
 
   client
@@ -59,10 +57,9 @@ app.post("/heroes/add", (req, res) => {
     });
 });
 
-// Маршрут для видалення супергероя
-app.delete("/heroes/:id", (req, res) => {
+app.delete(`/heroes/:id`, (req, res) => {
   const superheroId = req.params.id;
-  const query = "DELETE FROM heroes WHERE id = $1"; // Змініть назву таблиці на відповідну
+  const query = "DELETE FROM heroes WHERE id = $1";
   const values = [superheroId];
 
   client
@@ -76,7 +73,37 @@ app.delete("/heroes/:id", (req, res) => {
     });
 });
 
-// Прослуховування порту 5500
-app.listen(5500, () => {
-  console.log("Server is running on port 5500");
+app.put("/heroes/:id", (req, res) => {
+  const superheroId = req.params.id;
+  const { nickname, name, description, superpowers, phrase } = req.body;
+  const query =
+    "UPDATE heroes SET nickname = $1, name = $2, description = $3, superpowers = $4, phrase = $5 WHERE id = $6 RETURNING *";
+  const values = [
+    nickname,
+    name,
+    description,
+    superpowers,
+    phrase,
+    superheroId,
+  ];
+
+  client
+    .query(query, values)
+    .then((results) => {
+      res.json(results.rows[0]);
+    })
+    .catch((error) => {
+      console.error("Error updating superhero in the database", error);
+      res
+        .status(500)
+        .json({ error: "Error updating superhero in the database" });
+    });
+});
+
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
+});
+
+app.listen(8080, () => {
+  console.log("Server is running on port 8080");
 });

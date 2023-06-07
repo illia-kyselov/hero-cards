@@ -39,6 +39,7 @@ export const SuperheroForm = ({ onAdd }) => {
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
+              required
             />
           </label>
           <label>
@@ -47,6 +48,7 @@ export const SuperheroForm = ({ onAdd }) => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              required
             />
           </label>
         </div>
@@ -56,6 +58,7 @@ export const SuperheroForm = ({ onAdd }) => {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              required
             />
           </label>
         </div>
@@ -65,6 +68,7 @@ export const SuperheroForm = ({ onAdd }) => {
             <textarea
               value={superpowers}
               onChange={(e) => setSuperpowers(e.target.value)}
+              required
             />
           </label>
         </div>
@@ -74,10 +78,15 @@ export const SuperheroForm = ({ onAdd }) => {
             <textarea
               value={phrase}
               onChange={(e) => setPhrase(e.target.value)}
+              required
             />
           </label>
         </div>
-        <button type="submit">Add Superhero</button>
+        <div className="button-update-container">
+          <button type="submit" className="button-add">
+            Add Superhero
+          </button>
+        </div>
       </form>
     </div>
   );
